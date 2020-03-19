@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startingLevel: 1
   characterClass: 10
+  progression: {fileID: 11400000, guid: 0e35764de8c8a334bb08ccd87db9af44, type: 2}
 --- !u!1001 &1374084415153699989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40,7 +41,7 @@ PrefabInstance:
         type: 3}
       propertyPath: defaultWeapon
       value: 
-      objectReference: {fileID: 11400000, guid: 5fb45a5d1a22fc34680ee3e8cde0ed21,
+      objectReference: {fileID: 11400000, guid: ccda893e76f58ef47b01d34d1b0d1a7f,
         type: 2}
     - target: {fileID: 6886510894488723075, guid: b131445b65665e34db068ba010e33f07,
         type: 3}
@@ -102,7 +103,13 @@ PrefabInstance:
       propertyPath: chaseDistance
       value: 20
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9128266304186386114, guid: b131445b65665e34db068ba010e33f07,
+        type: 3}
+      propertyPath: characterClass
+      value: 10
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 9128266304186386114, guid: b131445b65665e34db068ba010e33f07, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: b131445b65665e34db068ba010e33f07, type: 3}
 --- !u!1 &3801532982523241661 stripped
 GameObject:

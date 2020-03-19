@@ -77,9 +77,13 @@ namespace RPG.Combat
             if(target == null) return;
             if(currentWeapon.HasProjectile())
             {
-              currentWeapon.LaunchProjectile(rightHandTransform,leftHandTransform,target);
+              currentWeapon.LaunchProjectile(rightHandTransform,leftHandTransform,target,gameObject);
             }
-            target.TakeDamage(currentWeapon.GetWeaponDamage());
+            else
+            {
+                  target.TakeDamage(gameObject,currentWeapon.GetWeaponDamage());
+            }
+            
         }
         void Shoot()
         {
@@ -107,6 +111,10 @@ namespace RPG.Combat
         {
             GetComponent<Animator>().ResetTrigger("attack");
             GetComponent<Animator>().SetTrigger("stopattack");
+        }
+        public Health GetTarget()
+        {
+            return target;
         }
         public object CaptureState()
         {
