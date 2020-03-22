@@ -19,7 +19,7 @@ namespace RPG.Resources
         }
         private void SetHealthText()
         {
-              GetComponent<Text>().text = System.String.Format("{0}%",health.GetHealthPercentage());
+            GetComponent<Text>().text = System.String.Format("{0:0}/{1:0}",health.GetHealthPoints(),health.GetMaxHealth());
         }
         
     }
