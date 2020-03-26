@@ -18,13 +18,9 @@ namespace RPG.Saving
             if (state.ContainsKey("lastSceneBuildIndex"))
             {
                 buildIndex = (int)state["lastSceneBuildIndex"];
-                if(buildIndex != SceneManager.GetActiveScene().buildIndex)
-                {
-                    yield return SceneManager.LoadSceneAsync(buildIndex);
-                }
             }
-            
-            RestoreState(state);
+             yield return SceneManager.LoadSceneAsync(buildIndex);          
+             RestoreState(state);
         }
 
         public void Save(string saveFile)

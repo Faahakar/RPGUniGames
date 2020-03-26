@@ -5,6 +5,9 @@ using RPG.Combat;
 using RPG.Movement;
 using RPG.Resources;
 using RPG.Core;
+using GameDevTV.Utils;
+using System;
+
 namespace RPG.Control
 {
      public class AIController : MonoBehaviour
@@ -21,18 +24,29 @@ namespace RPG.Control
         GameObject player;
         Health health;
         Mover mover;
-        Vector3 guardPosition;
+        LazyValue<Vector3> guardPosition;
         float timeSinceLastSawPlayer = Mathf.Infinity;
         float timeSinceLastArrivedWayPoint = Mathf.Infinity;
         int currentPointIndex = 0;
-        private void Start()
+        private void Awake()
         {
             health = GetComponent<Health>();
             fighter =  GetComponent<Fighter>();
             mover =  GetComponent<Mover>();
-            player = GameObject.FindWithTag("Player");
-            guardPosition =  transform.position;
+            player = GameObject.FindWithTag("Player");  
+            guardPosition = new LazyValue<Vector3>(GetGuardPosition);
+                   
         }
+       
+        private Vector3 GetGuardPosition()
+        {                           
+            return  transform.position;
+        }
+        private void Start() 
+        {
+            guardPosition.ForceInit();
+        }
+
         private void Update()
         {   
             if(health.IsDead()) return;     
@@ -58,7 +72,7 @@ namespace RPG.Control
 
         private void PatrolBehaviour()
         {
-            Vector3 nextPosition = guardPosition;
+            Vector3 nextPosition = guardPosition.value;
             if(patrolPath !=null)
             { 
                 if(AtWayPoint())

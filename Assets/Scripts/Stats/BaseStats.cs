@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using GameDevTV.Utils;
 using UnityEngine;
 
 namespace RPG.Stats
@@ -12,17 +13,32 @@ namespace RPG.Stats
         [SerializeField] CharacterClass characterClass;
         [SerializeField] Progression progression = null;
         [SerializeField] GameObject levelUpParticleEffect = null;
+        [SerializeField] bool shouldUseModifiers = false;
         public event Action onLevelUp;
-        int currentLevel = 0;
+        LazyValue<int> currentLevel;
+        Experience experience;
+        private void Awake()
+        {
+            experience =  GetComponent<Experience>();
+            currentLevel = new LazyValue<int>(CalculateLevel);
+        }
         private void Start()
         {
-            Experience experience =  GetComponent<Experience>();
-           
-            currentLevel = CalculateLevel();
+           currentLevel.ForceInit();             
+        }
+        private void OnEnable()
+        {
             if(experience != null)
             {
                 experience.onExperienceGained += UpdateLevel;
-            }
+            }     
+        }
+        private void OnDisable() 
+        {
+            if(experience != null)
+            {
+                experience.onExperienceGained -= UpdateLevel;
+            }        
         }
 
         public float GetStat(Stat stat)
@@ -39,14 +55,11 @@ namespace RPG.Stats
 
         public int GetLevel()
         {
-            if(currentLevel < 1)
-            {
-                currentLevel = CalculateLevel();
-            }
-            return currentLevel;
+            return currentLevel.value;
         }
         private float GetAdditiveModifiers(Stat stat)
         { 
+            if(!shouldUseModifiers) return 0;
             float total =  0;
             foreach (IModifierProvider provider in GetComponents<IModifierProvider>())
             {
@@ -59,6 +72,7 @@ namespace RPG.Stats
         }
         private float GetPercentageModifier(Stat stat)
         {
+            if(!shouldUseModifiers) return 0;
             float  percentage = 0;
             foreach (IModifierProvider provider in GetComponents<IModifierProvider>())
             {
@@ -73,9 +87,9 @@ namespace RPG.Stats
         private void UpdateLevel() 
         {
            int newLevel  = CalculateLevel();
-           if(newLevel > currentLevel)
+           if(newLevel > currentLevel.value)
            {
-               currentLevel = newLevel;
+               currentLevel.value = newLevel;
                LevelUpEffect();
                onLevelUp();
            }

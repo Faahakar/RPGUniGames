@@ -197,6 +197,16 @@ PrefabInstance:
       propertyPath: m_RenderMode
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 937081113532834182, guid: 4c2dbed8021ae224a9276a9e18a430c2,
+        type: 3}
+      propertyPath: m_BlocksRaycasts
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 937081113532834182, guid: 4c2dbed8021ae224a9276a9e18a430c2,
+        type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 937081113532834183, guid: 4c2dbed8021ae224a9276a9e18a430c2,
         type: 3}
       propertyPath: m_Name

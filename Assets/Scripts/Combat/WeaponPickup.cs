@@ -10,12 +10,17 @@ namespace RPG.Combat
         private void OnTriggerEnter(Collider other) {
             if(other.gameObject.tag == "Player")
             {
-                other.GetComponent<Fighter>().EquipWeapon(weaponToEquip);  
-                //Destroy(gameObject);
-                StartCoroutine(HideForSeconds(respawnTime));
+                PickUp(other);
             }
-            
+
         }
+
+        private void PickUp(Collider other)
+        {
+            other.GetComponent<Fighter>().EquipWeapon(weaponToEquip);
+            StartCoroutine(HideForSeconds(respawnTime));
+        }
+
         private IEnumerator HideForSeconds(float seconds)
         {
             ShowPickup(false);

@@ -14,10 +14,13 @@ namespace RPG.Movement
         [SerializeField] float maxSpeed = 6f;
         NavMeshAgent navMeshAgent;
         Health health;
+        private void Awake()
+        {
+          health = GetComponent<Health>();
+          navMeshAgent = GetComponent<NavMeshAgent>(); 
+        }
         private void Start()
         {
-        health = GetComponent<Health>();
-          navMeshAgent = GetComponent<NavMeshAgent>(); 
         }
         void Update()
         {
@@ -60,10 +63,10 @@ namespace RPG.Movement
         public void RestoreState(object state)
         {
            Dictionary<string,object> data = (Dictionary<string,object>)state;
-           GetComponent<NavMeshAgent>().enabled = false;
+           navMeshAgent.enabled = false;
            transform.position =  ((SerializableVector3)data["position"]).ToVector();
            transform.eulerAngles = ((SerializableVector3)data["rotation"]).ToVector();
-           GetComponent<NavMeshAgent>().enabled = true;
+           navMeshAgent.enabled = true;
         }
        
 

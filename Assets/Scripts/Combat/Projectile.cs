@@ -13,7 +13,7 @@ namespace RPG.Combat
         [SerializeField] float lifeAfterImpact = 2f;
         Health target = null;
         GameObject instigator = null;
-         float damage = 0;
+        float damage = 0;
         // Start is called before the first frame update
         void Start()
         {     
