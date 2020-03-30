@@ -67,7 +67,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MaskRadius: 12.78
+    - _MaskRadius: 10
     - _Metallic: 0
     - _Mode: 0
     - _NoiseScale: 3.84
