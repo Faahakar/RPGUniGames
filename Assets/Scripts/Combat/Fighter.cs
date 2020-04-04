@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using GameDevTV.Utils;
 using System;
 
+
+
 namespace RPG.Combat
 {
     public class Fighter : MonoBehaviour,IAction, ISaveable, IModifierProvider

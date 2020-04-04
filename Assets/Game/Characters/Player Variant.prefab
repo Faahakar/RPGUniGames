@@ -210,12 +210,27 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 4224214993166347098, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5794329157239347837, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5938005406633880912, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
         type: 3}
       propertyPath: levelUpParticleEffect
       value: 
       objectReference: {fileID: 7395140073135150685, guid: a83e5514d605eeb41b874d69fd591818,
         type: 3}
+    - target: {fileID: 6002757449501246020, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 8311349749301900561, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
         type: 3}
       propertyPath: m_LocalPosition.x
