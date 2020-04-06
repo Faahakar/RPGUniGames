@@ -1,80 +1,30 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using RPG.Resources;
+using UnityEngine;
+
 namespace RPG.Combat
 {
-    [CreateAssetMenu(fileName = "Weapon", menuName = "Weapons/MakeNewWeapon", order = 0)]
-    public class Weapon : ScriptableObject 
+    public class Weapon : MonoBehaviour
     {
-        [SerializeField] AnimatorOverrideController animatorOverride = null;
-        [SerializeField] GameObject equippedPrefab = null;
-        [SerializeField] float weaponRange = 2f;
-        [SerializeField] float weapondamage = 5f;
-        [SerializeField] float percentageBonus = 0;
-        [SerializeField] bool isRightHanded = true;
-        [SerializeField] Projectile projectile = null;
-
-        const string weaponName = "Weapon";
-
-        public void Spawn(Transform rightHandTransform,Transform leftHandTransform, Animator animator)
+        bool isCollidingWith = false;
+        public void OnHit()
         {
-            DestroyOldWeapon(rightHandTransform,leftHandTransform);
-            if(equippedPrefab !=null)
-            {
-                Transform handTransform = GetTransform(rightHandTransform,leftHandTransform);
-                GameObject weapon = Instantiate(equippedPrefab, handTransform);
-                weapon.name = weaponName;
-            }
-            var overrideController = animator.runtimeAnimatorController as AnimatorOverrideController;
-            if(animatorOverride != null)
-            {
-                animator.runtimeAnimatorController = animatorOverride;
-            }
-            else if(overrideController != null)
-            {                   
-                animator.runtimeAnimatorController = overrideController.runtimeAnimatorController;           
-            }
-           
+            print("Weapon Hit" + gameObject.name);
         }
-        private void DestroyOldWeapon(Transform rightHandTransform, Transform leftHandTransform)
-        {
-            Transform oldWeapon = rightHandTransform.Find(weaponName);
-            if(oldWeapon == null)
-            {
-                oldWeapon = leftHandTransform.Find(weaponName);
-            }
-            if(oldWeapon == null) return;
-            oldWeapon.name = "DESTROYING";
-            Destroy(oldWeapon.gameObject);
+        private void OnTriggerEnter(Collider other) {
+            if(other.GetComponent<Health>().IsDead()) return;  
+           // target.TakeDamage(instigator,damage);
+           isCollidingWith = true;
 
         }
-        private Transform GetTransform(Transform rightHandTransform,Transform leftHandTransform)
+
+        public bool isCollidingWithEnemy()
         {
-             Transform handTransform;
-                if(isRightHanded) handTransform = rightHandTransform;
-                else handTransform = leftHandTransform;
-                return handTransform;
+            return isCollidingWith;
         }
-        public bool HasProjectile()
-        {
-            return projectile != null;
-        }
-        public void LaunchProjectile(Transform rightHandTransform,Transform leftHandTransform, Health target, GameObject instigator, float calculatedDamage)
-        {
-             Projectile projectileInstance = Instantiate(projectile,GetTransform(rightHandTransform,leftHandTransform).position,Quaternion.identity);
-             projectileInstance.SetTarget(target,instigator,calculatedDamage);
-        }
-        public float GetWeaponRange()
-        {
-            return weaponRange;
-        }
-        public float GetPercentageBonus()
-        {
-            return percentageBonus;
-        }
-        public float GetWeaponDamage()
-        {
-            return weapondamage;
-        }
-        
     }
+
+
 }

@@ -13,6 +13,9 @@ namespace RPG.Movement
         [SerializeField] Transform target;
         [SerializeField] float maxSpeed = 6f;
         NavMeshAgent navMeshAgent;
+
+        float speed = 0;
+        Vector3 velocity, localVelocity;
         Health health;
         private void Awake()
         {
@@ -44,14 +47,22 @@ namespace RPG.Movement
 
         private void UpdateAnimator()
         {
-            Vector3 velocity = navMeshAgent.velocity;
-            Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-            float speed = localVelocity.z;
+            velocity = navMeshAgent.velocity;
+            localVelocity = transform.InverseTransformDirection(velocity);
+            speed = localVelocity.z;
             GetComponent<Animator>().SetFloat("ForwardSpeed", speed);
+        }
+        public void StopCharacter()
+        {
+           velocity = new Vector3(0,0,0);
+           localVelocity = new Vector3(0,0,0);
+           speed = 0f;
+           GetComponent<Animator>().SetFloat("ForwardSpeed", speed);
         }
         public void Cancel()
         {           
-            navMeshAgent.isStopped = true;              
+            navMeshAgent.isStopped = true;    
+                      
         }
         public object CaptureState()
         {

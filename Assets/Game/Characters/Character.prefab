@@ -49,7 +49,7 @@ Animator:
   m_GameObject: {fileID: 690841259829649689}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: d288a0e4a2d923b46898986e979da643, type: 3}
-  m_Controller: {fileID: 9100000, guid: e83400ed3d96196419b391c9a3384961, type: 2}
+  m_Controller: {fileID: 9100000, guid: abc4c70ac02458b4788481f8f83e1e63, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -74,6 +74,7 @@ MonoBehaviour:
   rightHandTransform: {fileID: 0}
   leftHandTransform: {fileID: 0}
   defaultWeapon: {fileID: 0}
+  isPlayer: 0
 --- !u!114 &114079336154559820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,6 +102,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   regenerationPercentage: 70
+  takeDamage:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 714984359395738240}
+        m_MethodName: Spawn
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!195 &195570513206711362
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -266,3 +281,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3270417524691585202}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &714984359395738240 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2634316704201181746, guid: d63b46a90cd8d3b42a404642c96661ad,
+    type: 3}
+  m_PrefabInstance: {fileID: 3270417524691585202}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19046574cfc448c42820a23d30564c8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

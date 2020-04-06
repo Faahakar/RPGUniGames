@@ -15,6 +15,8 @@ MonoBehaviour:
   startingLevel: 1
   characterClass: 10
   progression: {fileID: 11400000, guid: 0e35764de8c8a334bb08ccd87db9af44, type: 2}
+  levelUpParticleEffect: {fileID: 0}
+  shouldUseModifiers: 0
 --- !u!1001 &1374084415153699989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43,6 +45,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: ccda893e76f58ef47b01d34d1b0d1a7f,
         type: 2}
+    - target: {fileID: 3446236923399050927, guid: b131445b65665e34db068ba010e33f07,
+        type: 3}
+      propertyPath: isUsingTimeBetweenAttacks
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6886510894488723075, guid: b131445b65665e34db068ba010e33f07,
         type: 3}
       propertyPath: m_LocalPosition.x
