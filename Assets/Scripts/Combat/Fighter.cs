@@ -165,12 +165,21 @@ namespace RPG.Combat
                         animator.SetBool("Running", false);
                     }
                     
-                }
-                
-                
+                }          
                 else
                 {
                     transform.LookAt(target.transform);     
+                      if(Vector3.Distance(transform.position, target.transform.position) < 15f)
+                      {
+                            if(attack == 0)
+                            {
+                                if(Input.GetButtonDown("Fire2"))
+                                {      
+                                // GetComponent<Mover>().MoveTo(target.transform.position,1f); 
+                                    MoveAttack();
+                                }     
+                            }    
+                      }
                     //print(attack);
                         if (GetisInRangeToAttack())
                         {  
@@ -178,15 +187,7 @@ namespace RPG.Combat
                             GetComponent<Mover>().Cancel();  
                             animator.SetBool("Moving", false);
                             animator.SetBool("Running", false);  
-                        if(attack == 0)
-                        {
-                            if(Input.GetButtonDown("Fire2"))
-                            {      
-                            // GetComponent<Mover>().MoveTo(target.transform.position,1f); 
-                                MoveAttack();
-                            }     
-                        }    
-                        
+                            
                             if(Input.GetButtonDown("Fire1") && attack <=3)
                             {  
                                 print(attack);
