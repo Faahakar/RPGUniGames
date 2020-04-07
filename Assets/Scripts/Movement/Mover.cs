@@ -15,10 +15,15 @@ namespace RPG.Movement
         NavMeshAgent navMeshAgent;
 
         float speed = 0;
+        bool canMove = true;
         Vector3 velocity, localVelocity;
         Health health;
+        Animator animator;
+
         private void Awake()
         {
+
+          animator = GetComponent<Animator>();
           health = GetComponent<Health>();
           navMeshAgent = GetComponent<NavMeshAgent>(); 
         }
@@ -28,7 +33,10 @@ namespace RPG.Movement
         void Update()
         {
             navMeshAgent.enabled = !health.IsDead();
+        }
+        private void LateUpdate() {
             UpdateAnimator();
+            
         }
         public void StartMoveAction(Vector3 destination, float speedFraction)
         {
@@ -37,27 +45,44 @@ namespace RPG.Movement
             MoveTo(destination, speedFraction);
         }
 
-
         public void MoveTo(Vector3 destination, float speedFraction)
         {
-            navMeshAgent.destination = destination;
-            navMeshAgent.speed = maxSpeed*Mathf.Clamp01(speedFraction);
+            navMeshAgent.SetDestination(destination);
+            navMeshAgent.speed = maxSpeed*Mathf.Clamp01(speedFraction); 
             navMeshAgent.isStopped = false;
+
         }
 
         private void UpdateAnimator()
         {
-            velocity = navMeshAgent.velocity;
-            localVelocity = transform.InverseTransformDirection(velocity);
-            speed = localVelocity.z;
-            GetComponent<Animator>().SetFloat("ForwardSpeed", speed);
+
+        }
+
+        public void isMovingRunning(bool isMoving, bool isRunning)
+        {
+           
+           if(isMoving)
+           {
+
+            animator.SetBool("Moving",true);
+            if(isRunning)
+            {
+                animator.SetBool("Running",true);
+            }
+           }
+           else
+           {
+            animator.SetBool("Moving",false);
+            animator.SetBool("Running",false);
+           }
+
         }
         public void StopCharacter()
         {
-           velocity = new Vector3(0,0,0);
+         /*  velocity = new Vector3(0,0,0);
            localVelocity = new Vector3(0,0,0);
            speed = 0f;
-           GetComponent<Animator>().SetFloat("ForwardSpeed", speed);
+           GetComponent<Animator>().SetFloat("ForwardSpeed", speed);*/
         }
         public void Cancel()
         {           
