@@ -269,7 +269,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: e83400ed3d96196419b391c9a3384961, type: 2}
+      objectReference: {fileID: 9100000, guid: f4218db5fcda1d24ba5b0d044b3aad0c, type: 2}
     - target: {fileID: 624253962325157730, guid: 5ee1c0f8fed99d9458ca5dffa3f88332,
         type: 3}
       propertyPath: m_CullingMode
@@ -391,7 +391,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6993720338206931214, guid: 5ee1c0f8fed99d9458ca5dffa3f88332, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 5ee1c0f8fed99d9458ca5dffa3f88332, type: 3}
 --- !u!1 &6184820195242246877 stripped
 GameObject:

@@ -11,11 +11,13 @@ namespace RPG.Combat
         bool isCollidingWith = false;
         public void OnHit()
         {
-            print("Weapon Hit" + gameObject.name);
+           // print("Weapon Hit" + gameObject.name);
         }
         private void OnTriggerEnter(Collider other) {
+            if(other.GetComponent<Health>() == null) return;
             if(other.GetComponent<Health>().IsDead()) return;  
            // target.TakeDamage(instigator,damage);
+
            isCollidingWith = true;
 
         }

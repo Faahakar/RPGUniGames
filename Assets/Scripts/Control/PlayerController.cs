@@ -30,10 +30,8 @@ namespace RPG.Control
         }         
         // Update is called once per frame
         void Update()
-        {
-     
-          
-        //  Shader.SetGlobalVector ("_GLOBALMaskPosition",transform.position);
+        {         
+          //Shader.SetGlobalVector ("_GLOBALMaskPosition",transform.position);
           //Shader.SetGlobalFloat ("_GLOBALMaskRadius", radius);
           //Shader.SetGlobalFloat ("_GLOBALMaskSoftness", softness);  
             if(InteractWithUI()) return;
@@ -43,7 +41,7 @@ namespace RPG.Control
               return;
             }
             if(InteractWithComponent()) return;
-            if (InteractWithMovement()) return;  
+            if(InteractWithMovement()) return;  
             SetCursor(CursorType.None);   
         }
 
@@ -97,13 +95,14 @@ namespace RPG.Control
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    GetComponent<Mover>().StartMoveAction(target,1f);
-                }
+                  GetComponent<Mover>().StartMoveAction(target,1f);
+                }          
                 SetCursor(CursorType.Movement);
                 return true;
             }
-            return false;
 
+            return false;
+        
         }
         private bool RaycastNavMesh(out Vector3 target)
         {  

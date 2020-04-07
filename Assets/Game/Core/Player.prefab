@@ -60,49 +60,6 @@ MonoBehaviour:
     hotspot: {x: 0, y: 0}
   maxNavMeshProjectionDistance: 1
   maxNavPathLength: 40
---- !u!114 &6993720338206931214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 798946681971815354}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f45931f1f9253624a90f1031c9e72e69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timeBetweenAttacks: 1
-  rightHandTransform: {fileID: 714753670385893842}
-  leftHandTransform: {fileID: 717391383886774734}
-  defaultWeapon: {fileID: 11400000, guid: 0995e2561af2601468a5a426389f6791, type: 2}
-  animator: {fileID: 0}
-  gravity: -9.83
-  runSpeed: 8
-  walkSpeed: 3
-  strafeSpeed: 3
-  jumpSpeed: 8
-  canJump: 1
-  inAirSpeed: 8
-  newVelocity: {x: 0, y: 0, z: 0}
-  isGrounded: 1
-  dead: 0
-  isAiming: 0
-  isBlocking: 0
-  isStunned: 0
-  isSitting: 0
-  inBlock: 0
-  blockGui: 0
-  weaponSheathed: 0
-  weaponSheathed2: 0
-  isStealth: 0
-  stealthSpeed: 0
-  isWall: 0
-  ledgeGui: 0
-  ledge: 0
-  ledgeSpeed: 0
-  attack: 0
-  specialAttack2Bool: 0
 --- !u!1001 &180198621461631651
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -119,7 +76,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: e83400ed3d96196419b391c9a3384961, type: 2}
+      objectReference: {fileID: 9100000, guid: f4218db5fcda1d24ba5b0d044b3aad0c, type: 2}
     - target: {fileID: 114096510035373982, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: m_Enabled
@@ -313,15 +270,3 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: deec028a02552a844a2f6d595d1a593e, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45608daf8c357ac4883238b3247d64b7, type: 3}
---- !u!4 &717391383886774734 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4278834990416654, guid: 45608daf8c357ac4883238b3247d64b7,
-    type: 3}
-  m_PrefabInstance: {fileID: 719340339740492480}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &714753670385893842 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4728550411551506, guid: 45608daf8c357ac4883238b3247d64b7,
-    type: 3}
-  m_PrefabInstance: {fileID: 719340339740492480}
-  m_PrefabAsset: {fileID: 0}
