@@ -77,8 +77,8 @@ namespace RPG.Resources
          private void Die()
          {
             if(isDead) return;
-            isDead = true;
-            GetComponent<Animator>().SetTrigger("die");
+            isDead = true;        
+            GetComponent<Animator>().SetTrigger("DeathTrigger");
             GetComponent<ActionScheduler>().CancelCurrentAction();
             transform.Find("Quad").gameObject.SetActive(false);
          }

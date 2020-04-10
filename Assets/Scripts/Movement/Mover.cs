@@ -41,6 +41,7 @@ namespace RPG.Movement
         public void StartMoveAction(Vector3 destination, float speedFraction)
         {
             GetComponent<ActionScheduler>().StartAction(this);
+            if(GetComponent<Fighter>() != null)
             GetComponent<Fighter>().Cancel();
             MoveTo(destination, speedFraction);
         }
@@ -55,6 +56,17 @@ namespace RPG.Movement
 
         private void UpdateAnimator()
         {
+            if(GetComponent<Fighter>() == null)
+            {
+                if(GetComponent<CombatTarget>() == null)
+                {
+                    velocity = navMeshAgent.velocity;
+                    speed = transform.InverseTransformDirection(velocity).z;
+                    //Update animator with movement values       
+                    animator.SetFloat("ForwardSpeed", speed);       
+                }
+
+            }
 
         }
 
@@ -63,7 +75,6 @@ namespace RPG.Movement
            
            if(isMoving)
            {
-
             animator.SetBool("Moving",true);
             if(isRunning)
             {
@@ -76,13 +87,6 @@ namespace RPG.Movement
             animator.SetBool("Running",false);
            }
 
-        }
-        public void StopCharacter()
-        {
-         /*  velocity = new Vector3(0,0,0);
-           localVelocity = new Vector3(0,0,0);
-           speed = 0f;
-           GetComponent<Animator>().SetFloat("ForwardSpeed", speed);*/
         }
         public void Cancel()
         {           
