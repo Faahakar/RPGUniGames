@@ -14,16 +14,23 @@ namespace RPG.Combat
 {
     public class Fighter : MonoBehaviour,IAction, ISaveable, IModifierProvider
     {
+        Rigidbody rigidBody;
         [SerializeField] float timeBetweenAttacks = 1f;
         [SerializeField] Transform rightHandTransform = null;
         [SerializeField] Transform leftHandTransform = null;
         [SerializeField] WeaponConfig defaultWeapon = null;
         [SerializeField] bool isPlayer  = false;
+        [SerializeField] float moveAttackTime = 0.9f;
       
         Health target;
        
         float timeSinceLastAttack = Mathf.Infinity;
         float damage = 0;
+        float rotationSpeed = 15f;
+        public float gravity = -9.83f;
+        public float runSpeed = 8f;
+        public float walkSpeed = 3f;
+        public float strafeSpeed = 3f;
 
         
         WeaponConfig currentWeaponConfig;
@@ -38,6 +45,10 @@ namespace RPG.Combat
         Vector3 velocity;
         private bool isMovingAttacking = false;
         float velocityX, velocityZ;
+        private Vector3 newVelocity;
+        private Vector3 inputVec;
+        private Vector3 dashInputVec;
+
         private void Awake() 
         {
             currentWeaponConfig = defaultWeapon;
@@ -51,6 +62,7 @@ namespace RPG.Combat
 
         private void Start() 
         {       
+            rigidBody = GetComponent<Rigidbody>();
             animator = GetComponent<Animator>();
             navmeshAgent = GetComponent<NavMeshAgent>();
             currentWeapon.ForceInit();
@@ -69,15 +81,22 @@ namespace RPG.Combat
         private void Update()
         {
             timeSinceLastAttack += Time.deltaTime;
-            velocity = navmeshAgent.velocity;
+            StartCoroutine(AttackMoveController());              
+        }
+        private void LateUpdate() {
+            rigidBody.velocity = navmeshAgent.velocity;
+            velocity = rigidBody.velocity;
             velocityX = transform.InverseTransformDirection(velocity).x;
             velocityZ = transform.InverseTransformDirection(velocity).z;
+            //rgVelocityX = transform.InverseTransformDirection(rigidBody.velocity).x;
+            //rgVelocityZ = transform.InverseTransformDirection(rigidBody.velocity).x;
+            
             //Update animator with movement values
             if(isPlayer)
             {
 
-                animator.SetFloat("Input X", velocityX);
-                animator.SetFloat("Input Z", velocityZ);
+                animator.SetFloat("Input X", velocityX / runSpeed);
+                animator.SetFloat("Input Z", velocityZ / runSpeed);
          
             }
             else
@@ -85,47 +104,66 @@ namespace RPG.Combat
              animator.SetFloat("ForwardSpeed", velocityZ);
 
             }
-            StartCoroutine(AttackMoveController());              
-        }
-        private void LateUpdate() {
         }       
         void FixedUpdate()
         {
-
+            rigidBody.AddForce(0, gravity, 0, ForceMode.Acceleration);
             UpdateMovement();           
             
         }
 
         private void UpdateMovement()
         {
-            if (isBlocking || isStunned)
-            {
-                velocity = new Vector3(0, 0, 0);
-            }
-            else
-            {
-                /*character is not strafing
-				if(!isStrafing){
+           	Vector3 motion = inputVec;
+			if(!isBlocking && !isStunned){
+				//character is not strafing
 					newVelocity = motion.normalized * runSpeed;
-				}*/
-                //character is strafing
-                /*else{
-					newVelocity = motion.normalized * strafeSpeed;
-				}
-				if(ledge){
-					newVelocity = motion.normalized * ledgeSpeed;
-				}
-				if(isStealth){
-					newVelocity = motion.normalized * stealthSpeed;
-				}*/
+				
             }
+			
+			//no input, character not moving
+			else{
+				newVelocity = new Vector3(0,0,0);
+				inputVec = new Vector3(0,0,0);
+			}
         }
-
+       /* void CameraRelativeInput(){
+		if(!isStunned){
+			float inputHorizontal = Input.GetAxisRaw("Horizontal");
+			float inputVertical = Input.GetAxisRaw("Vertical");
+			float inputDashHorizontal = Input.GetAxisRaw("DashHorizontal");
+			float inputDashVertical = Input.GetAxisRaw("DashVertical");
+			//Camera relative movement
+			Transform cameraTransform = Camera.main.transform;
+			//Forward vector relative to the camera along the x-z plane   
+			Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
+			forward.y = 0;
+			forward = forward.normalized;
+			//Right vector relative to the camera always orthogonal to the forward vector
+			Vector3 right = new Vector3(forward.z, 0, -forward.x);
+			inputVec = inputHorizontal * right + inputVertical * forward;
+			dashInputVec = inputDashHorizontal * right + inputDashVertical * forward;
+			if(!isBlocking){
+				//if there is some input (account for controller deadzone)
+				if(inputVertical > 0.1 || inputVertical < -0.1 || inputHorizontal > 0.1 || inputHorizontal < -0.1){
+					//set that character is moving
+					animator.SetBool("Moving", true);
+					animator.SetBool("Running", true);
+				}
+				else{
+					//character is not moving
+					animator.SetBool("Moving", false);
+					animator.SetBool("Running", false);
+				}
+			}
+		}
+	}
+*/
         IEnumerator AttackMoveController()
         {
            if(isPlayer)
             {
-                AbilitiesController();     
+                StartCoroutine(AbilitiesController());     
             }
             else
             {
@@ -144,81 +182,87 @@ namespace RPG.Combat
                 }
     
             }
-            yield return null;
-
-                 
+            yield return null;          
         }
-        private void AbilitiesController()
-        {      
-            if((!isStunned || !isBlocking))   
-            {
-                if(isTargetInvalid())
+        IEnumerator AbilitiesController()
+        {                         
+               if(!isStunned && isTargetInvalid())
                {
-                    if(velocity.sqrMagnitude > 0)
+                    if(velocity.sqrMagnitude > 0f && 0.1f < velocity.sqrMagnitude)
                     {
-                    animator.SetBool("Moving", true);
-                    animator.SetBool("Running", true);
+                        animator.SetBool("Moving", true);
+                        animator.SetBool("Running", true);
                     }
                     else
                     {
                         animator.SetBool("Moving", false);
                         animator.SetBool("Running", false);
-                    }
-                    
-                }          
-                else
+                    }                  
+                } 
+                else if(!isTargetInvalid())
                 {
-                    transform.LookAt(target.transform);     
-                      if(Vector3.Distance(transform.position, target.transform.position) < 15f)
-                      {
-                            if(attack == 0)
-                            {
-                                if(Input.GetButtonDown("Fire2"))
-                                {      
-                                // GetComponent<Mover>().MoveTo(target.transform.position,1f); 
-                                    MoveAttack();
-                                }     
-                            }    
-                      }
-                    //print(attack);
-                        if (GetisInRangeToAttack())
-                        {  
+                    transform.LookAt(target.transform);   
+               
+                    if (Input.GetMouseButton(1))
+                    {
+                        if (!inBlock && attack == 0)
+                        {
+                            animator.SetBool("Block", true);
+                            isBlocking = true;
+                            animator.SetBool("Running", false);
+                            animator.SetBool("Moving", false);
+                        }
+                    }  
+                    if(!Input.GetMouseButton(1))
+                    {
+                        inBlock = false;
+                        isBlocking = false;
+                        animator.SetBool("Block", false);
+                    }                                
+                                   
+                    if(!isBlocking)
+                    {        
     
+                        if (GetisInRangeToAttack())
+                        {     
                             GetComponent<Mover>().Cancel();  
                             animator.SetBool("Moving", false);
-                            animator.SetBool("Running", false);  
-                            
-                            if(Input.GetButtonDown("Fire1") && attack <=3)
+                            animator.SetBool("Running", false);    
+                            print(attack);                        
+                            if(Input.GetButtonDown("Fire1"))
                             {  
-                                print(attack);
+                              //  print(attack);
                                 AttackChain();                 
                             }
-                        }
-                        else
-                        {
-                            animator.SetBool("Moving", true);
-                            animator.SetBool("Running", true);    
-                            GetComponent<Mover>().MoveTo(target.transform.position,1f); 
-                        // print("moving to target");
-                        }  
-                }        
-            }
-    
-           /* if (Input.GetMouseButtonDown(1))
-            {
-                if (attack == 0)
-                {
-                    animator.SetBool("Block", true);
-                    isBlocking = true;
-                    animator.SetBool("Running", false);
-                    animator.SetBool("Moving", false);
+                        }                    
+                        else if(!GetisInRangeToAttack())
+                        {               
+                            if(attack == 0)
+                            {
+                                if(Input.GetButtonDown("Fire2") && Vector3.Distance(transform.position,target.transform.position) <= 9f - navmeshAgent.stoppingDistance)
+                                {
+                                    MoveAttack();  
+                                    animator.SetBool("Moving", false);
+                                    animator.SetBool("Running", false);                                
+                                    yield return new WaitForSeconds(moveAttackTime);                                
+                                    animator.SetBool("Moving", true);
+                                    animator.SetBool("Running", true);  
 
+                                }        
+                                if(!isMovingAttacking)
+                                {
+                                    animator.SetBool("Moving", true);
+                                    animator.SetBool("Running", true);
+                                    GetComponent<Mover>().MoveTo(target.transform.position,1f);  
+                                }
+                            } 
+      
+        
+                        }  
+                    }
                 }
-            }   */
-          else
-          {
-              velocity = new Vector3(0,0,0);
-          }    
+                
+                yield return null;          
         }
         public bool ReachedDestination()
         {
@@ -236,7 +280,7 @@ namespace RPG.Combat
             }
             //if(GetComponent<Fighter>().GetTarget() == null)
             return false;
-        }
+        }      
         private bool isTargetInvalid()
         {
             if(target!=null)
@@ -255,13 +299,11 @@ namespace RPG.Combat
             {
                 StopAllCoroutines();
                 attack = 5;
-                isMovingAttacking = true;
+                isMovingAttacking = true;                
                 animator.SetTrigger("MoveAttack1Trigger");   
-                StartCoroutine(_LockMovementAndAttack(0.9f));
+                StartCoroutine(_LockMovementAndAttack(moveAttackTime));
                 isMovingAttacking = false;
-            }
-           
-   
+            }       
 	    }
         public void AttackChain()
         {                 
@@ -326,10 +368,6 @@ namespace RPG.Combat
             yield return new WaitForSeconds(chainLength);
             canChain = false;
         }
-        public bool FinishedAttack()
-        {
-            return isStunned;
-        }
         public bool GetIsAttacking()
         {
             return isAttacking;
@@ -338,7 +376,8 @@ namespace RPG.Combat
         {
             isStunned = true;
             animator.applyRootMotion = true;
-            velocity = new Vector3(0,0,0);
+            inputVec = new Vector3(0, 0, 0);
+            newVelocity = new Vector3(0, 0, 0);
             animator.SetFloat("Input X", 0);
             animator.SetFloat("Input Z", 0);
             animator.SetBool("Moving", false);
@@ -376,6 +415,11 @@ namespace RPG.Combat
                     }                         
    
         }
+        public IEnumerator _BlockHitReact(){
+            StartCoroutine(_LockMovementAndAttack(0.5f));
+            animator.SetTrigger("BlockHitReactTrigger");
+            yield return null;
+        }
 
         private void TriggerAttack()
         {
@@ -400,7 +444,7 @@ namespace RPG.Combat
             }
             else
             {
-                if(currentWeapon.value.isCollidingWithEnemy())
+                //if(currentWeapon.value.isCollidingWithEnemy())
                 target.TakeDamage(gameObject, damage);
             }
             
