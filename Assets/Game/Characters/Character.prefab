@@ -75,6 +75,11 @@ MonoBehaviour:
   leftHandTransform: {fileID: 0}
   defaultWeapon: {fileID: 0}
   isPlayer: 0
+  moveAttackTime: 0.9
+  gravity: -9.83
+  runSpeed: 8
+  walkSpeed: 3
+  strafeSpeed: 3
 --- !u!114 &114079336154559820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,7 +112,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 714984359395738240}
         m_MethodName: Spawn
-        m_Mode: 4
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

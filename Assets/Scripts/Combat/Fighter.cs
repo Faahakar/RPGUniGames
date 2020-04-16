@@ -1,7 +1,7 @@
 using UnityEngine;
 using RPG.Movement;
 using RPG.Saving;
-using RPG.Resources;
+using RPG.Attributes;
 using RPG.Core;
 using RPG.Stats;
 using System.Collections.Generic;
@@ -225,15 +225,17 @@ namespace RPG.Combat
     
                         if (GetisInRangeToAttack())
                         {     
-                            GetComponent<Mover>().Cancel();  
-                            animator.SetBool("Moving", false);
-                            animator.SetBool("Running", false);    
+                              
                             print(attack);                        
                             if(Input.GetButtonDown("Fire1"))
                             {  
-                              //  print(attack);
-                                AttackChain();                 
+                              // print(attack);
+                                AttackChain();                
                             }
+                            // GetComponent<Mover>().Cancel();  
+                             yield return new WaitForSeconds(0.15f);
+                            //animator.SetBool("Moving", false);
+                            //animator.SetBool("Running", false); 
                         }                    
                         else if(!GetisInRangeToAttack())
                         {               
@@ -502,7 +504,7 @@ namespace RPG.Combat
         }
         public void RestoreState(object state)
         {
-             string  weaponName = currentWeaponConfig.name = (string)state;
+             string weaponName = currentWeaponConfig.name = (string)state;
              WeaponConfig weapon = UnityEngine.Resources.Load<WeaponConfig>(weaponName);
              EquipWeapon(weapon);
         }

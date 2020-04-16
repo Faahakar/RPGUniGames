@@ -13,6 +13,7 @@
         Pass {        
                 ZWrite Off
                 ZTest Greater
+                Cull Front
                 Name "Behind"
                 Blend SrcAlpha OneMinusSrcAlpha
                 LOD 200                    
