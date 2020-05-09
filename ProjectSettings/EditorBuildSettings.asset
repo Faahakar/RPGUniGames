@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Sandbox.unity
     guid: fcac9a5d8faec3044a089b2319628417
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Dungeon1.unity
     guid: c6bc88ab8f879104e88fce70ed7b743f
   - enabled: 0
@@ -20,9 +20,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Vilage.unity
     guid: af08e1214ad0a784cb3a653fdd066389
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Floresta.unity
     guid: e534ab8ee0a4db345a28d71fdb3634de
+  - enabled: 1
+    path: Assets/Scenes/Caverna.unity
+    guid: 8ae17b9a747ad0143857fe4fce77e763
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: c388b46dad91ea4498f4a4aa4984b614,
       type: 2}
