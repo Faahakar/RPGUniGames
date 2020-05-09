@@ -11,15 +11,21 @@ namespace RPG.Attributes
         [SerializeField] RectTransform foreground = null;
         [SerializeField] Canvas rootCanvas = null;
 
+        [SerializeField] bool disableCanvas = true;
+
         // Update is called once per frame
         void Update()
         {
-            if(Mathf.Approximately(health.GetHealthFraction(),0) || Mathf.Approximately(health.GetHealthFraction(),1 ))
+            if(disableCanvas == true)
             {
-                rootCanvas.enabled = false;
-                return;
+                if(Mathf.Approximately(health.GetHealthFraction(),0) || Mathf.Approximately(health.GetHealthFraction(),1 ))
+                {
+                    rootCanvas.enabled = false;
+                    return;
+                }
+                rootCanvas.enabled = true;
             }
-            rootCanvas.enabled = true;
+
             foreground.localScale = new Vector3(health.GetHealthFraction(), 1 , 1);
         }
     }

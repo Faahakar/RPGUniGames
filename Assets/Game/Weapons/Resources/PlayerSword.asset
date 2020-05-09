@@ -12,6 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2e2c4257e7ee2949a243919d5326b0e, type: 3}
   m_Name: PlayerSword
   m_EditorClassIdentifier: 
+  itemID: 6a9daa13-3a93-4008-aff4-2dd23dc1dcc1
+  displayName: PlayerSword
+  description: 
+  icon: {fileID: 21300000, guid: d19901b0ee3c38743a7d383bd484b0b5, type: 3}
+  pickup: {fileID: 0}
+  stackable: 0
+  allowedEquipLocation: 5
   animatorOverride: {fileID: 22100000, guid: 5ebf4ba856dff8e4981b3814b3046609, type: 2}
   equippedPrefab: {fileID: 5607635448891088647, guid: eaa55c6d489c1d04e9a404d252de1014,
     type: 3}

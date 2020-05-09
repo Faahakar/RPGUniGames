@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
-
+using RPG.Control;
 
 namespace RPG.SceneManagement
 { 
@@ -27,7 +27,8 @@ namespace RPG.SceneManagement
           }
               
           private IEnumerator Transition()
-          {          
+          {       
+               
               if(sceneToLoad < 0)
               {
                   Debug.LogError("Scene to load is not set");
@@ -36,11 +37,18 @@ namespace RPG.SceneManagement
             
             DontDestroyOnLoad(gameObject);
             Fader fader = FindObjectOfType<Fader>();
-            yield return fader.FadeOut(fadeoutTime);
             //Save Current Level
             SavingWrapper wrapper = FindObjectOfType<SavingWrapper>();
+            PlayerController playerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+            playerController.enabled = false;
+            // Remove Control
+
+            yield return fader.FadeOut(fadeoutTime);         
             wrapper.Save();
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);   
+            PlayerController newplayerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+            newplayerController.enabled = false;
+            // Remove control
                             
             yield return asyncLoad;
             // Load Level
@@ -52,8 +60,11 @@ namespace RPG.SceneManagement
                 UpdatePlayer(otherPortal);
             }
             wrapper.Save();
+
             yield return new WaitForSeconds(fadeWaitTime);
             yield return fader.FadeIn(fadeInTime);
+            // restore control
+            playerController.enabled = true;
             Destroy(gameObject);
              
              

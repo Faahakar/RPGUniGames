@@ -1,6 +1,6 @@
 using UnityEngine;
 using RPG.Movement;
-using RPG.Saving;
+using GameDevTV.Saving;
 using RPG.Attributes;
 using RPG.Core;
 using RPG.Stats;
@@ -9,10 +9,14 @@ using GameDevTV.Utils;
 using System.Collections;
 using UnityEngine.AI;
 using System;
+using GameDevTV.Inventories;
+using RPG.Control;
+using UnityEngine.Events;
+using RPG.Inventories;
 
 namespace RPG.Combat
 {
-    public class Fighter : MonoBehaviour,IAction, ISaveable, IModifierProvider
+    public class Fighter : MonoBehaviour,IAction, ISaveable
     {
         Rigidbody rigidBody;
         [SerializeField] float timeBetweenAttacks = 1f;
@@ -23,6 +27,7 @@ namespace RPG.Combat
         [SerializeField] float moveAttackTime = 0.9f;
       
         Health target;
+        Equipment equipment;
        
         float timeSinceLastAttack = Mathf.Infinity;
         float damage = 0;
@@ -48,11 +53,46 @@ namespace RPG.Combat
         private Vector3 newVelocity;
         private Vector3 inputVec;
         private Vector3 dashInputVec;
+        GameObject player;
+        Fighter playerFighter;
+       [SerializeField]  OnTookHit onTookHit;
+        public class OnTookHit: UnityEvent<float>
+        {
+
+        }
 
         private void Awake() 
         {
             currentWeaponConfig = defaultWeapon;
             currentWeapon = new LazyValue<Weapon>(SetupDefaultWeapon);
+            equipment = GetComponent<Equipment>();
+            player =  GameObject.FindWithTag("Player");
+            playerFighter = GameObject.FindWithTag("Player").GetComponent<Fighter>();    
+            if(equipment)
+            {
+                if(defaultWeapon !=null)
+                {
+                    equipment.AddItem(EquipLocation.Weapon,defaultWeapon);
+
+                }
+            
+                equipment.equipmentUpdated += UpdateWeapon;
+            }
+            
+        }
+
+        private void UpdateWeapon()
+        {
+            var weapon = equipment.GetItemInSlot(EquipLocation.Weapon) as WeaponConfig;
+            if(weapon == null)
+            {
+                EquipWeapon(defaultWeapon);
+            }
+            else
+            {
+                EquipWeapon(weapon);
+            }
+
         }
 
         private Weapon SetupDefaultWeapon()
@@ -77,12 +117,13 @@ namespace RPG.Combat
         {
             return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
-
         private void Update()
         {
+            IsInPlayerBlockAngle();
             timeSinceLastAttack += Time.deltaTime;
-            StartCoroutine(AttackMoveController());              
+            StartCoroutine(PlayerEnemyBranching());           
         }
+
         private void LateUpdate() {
             rigidBody.velocity = navmeshAgent.velocity;
             velocity = rigidBody.velocity;
@@ -95,8 +136,8 @@ namespace RPG.Combat
             if(isPlayer)
             {
 
-                animator.SetFloat("Input X", velocityX / runSpeed);
-                animator.SetFloat("Input Z", velocityZ / runSpeed);
+                animator.SetFloat("Input X", velocityX);
+                animator.SetFloat("Input Z", velocityZ);
          
             }
             else
@@ -127,49 +168,20 @@ namespace RPG.Combat
 				inputVec = new Vector3(0,0,0);
 			}
         }
-       /* void CameraRelativeInput(){
-		if(!isStunned){
-			float inputHorizontal = Input.GetAxisRaw("Horizontal");
-			float inputVertical = Input.GetAxisRaw("Vertical");
-			float inputDashHorizontal = Input.GetAxisRaw("DashHorizontal");
-			float inputDashVertical = Input.GetAxisRaw("DashVertical");
-			//Camera relative movement
-			Transform cameraTransform = Camera.main.transform;
-			//Forward vector relative to the camera along the x-z plane   
-			Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
-			forward.y = 0;
-			forward = forward.normalized;
-			//Right vector relative to the camera always orthogonal to the forward vector
-			Vector3 right = new Vector3(forward.z, 0, -forward.x);
-			inputVec = inputHorizontal * right + inputVertical * forward;
-			dashInputVec = inputDashHorizontal * right + inputDashVertical * forward;
-			if(!isBlocking){
-				//if there is some input (account for controller deadzone)
-				if(inputVertical > 0.1 || inputVertical < -0.1 || inputHorizontal > 0.1 || inputHorizontal < -0.1){
-					//set that character is moving
-					animator.SetBool("Moving", true);
-					animator.SetBool("Running", true);
-				}
-				else{
-					//character is not moving
-					animator.SetBool("Moving", false);
-					animator.SetBool("Running", false);
-				}
-			}
-		}
-	}
-*/
-        IEnumerator AttackMoveController()
+        IEnumerator PlayerEnemyBranching()
         {
            if(isPlayer)
             {
-                StartCoroutine(AbilitiesController());     
+                StartCoroutine(AbilitiesController());  
+                
+                   
             }
             else
             {
+                
                 if(!isTargetInvalid())
                 {
-                    if (!GetisInRangeToAttack())
+                    if (!GetisInRangeToAttack(target.transform))
                     {
                         GetComponent<Mover>().MoveTo(target.transform.position,1f);                     
                     }
@@ -185,7 +197,26 @@ namespace RPG.Combat
             yield return null;          
         }
         IEnumerator AbilitiesController()
-        {                         
+        {      
+          
+            if (Input.GetMouseButtonDown(1))
+            {
+                
+                if (!inBlock && attack == 0)
+                {
+                    
+                    animator.SetBool("Block", true);
+                    isBlocking = true;        
+                    animator.SetBool("Running", false);
+                    animator.SetBool("Moving", false);
+                }
+            }  
+            if(Input.GetMouseButtonUp(1))
+            {
+                inBlock = false;
+                isBlocking = false;       
+                animator.SetBool("Block", false);
+            }                            
                if(!isStunned && isTargetInvalid())
                {
                     if(velocity.sqrMagnitude > 0f && 0.1f < velocity.sqrMagnitude)
@@ -199,45 +230,30 @@ namespace RPG.Combat
                         animator.SetBool("Running", false);
                     }                  
                 } 
+
                 else if(!isTargetInvalid())
                 {
                     transform.LookAt(target.transform);   
-               
-                    if (Input.GetMouseButton(1))
-                    {
-                        if (!inBlock && attack == 0)
-                        {
-                            animator.SetBool("Block", true);
-                            isBlocking = true;
-                            animator.SetBool("Running", false);
-                            animator.SetBool("Moving", false);
-                        }
-                    }  
-                    if(!Input.GetMouseButton(1))
-                    {
-                        inBlock = false;
-                        isBlocking = false;
-                        animator.SetBool("Block", false);
-                    }                                
+                                      
                                    
                     if(!isBlocking)
                     {        
     
-                        if (GetisInRangeToAttack())
+                        if (GetisInRangeToAttack(target.transform))
                         {     
                               
-                            print(attack);                        
+                            //print(attack);                        
                             if(Input.GetButtonDown("Fire1"))
                             {  
                               // print(attack);
                                 AttackChain();                
                             }
                             // GetComponent<Mover>().Cancel();  
-                             yield return new WaitForSeconds(0.15f);
-                            //animator.SetBool("Moving", false);
-                            //animator.SetBool("Running", false); 
+                            // yield return new WaitForSeconds(0.15f);
+                            animator.SetBool("Moving", false);
+                            animator.SetBool("Running", false); 
                         }                    
-                        else if(!GetisInRangeToAttack())
+                        else if(!GetisInRangeToAttack(target.transform))
                         {               
                             if(attack == 0)
                             {
@@ -251,18 +267,14 @@ namespace RPG.Combat
                                     animator.SetBool("Running", true);  
 
                                 }        
-                                if(!isMovingAttacking)
-                                {
-                                    animator.SetBool("Moving", true);
-                                    animator.SetBool("Running", true);
                                     GetComponent<Mover>().MoveTo(target.transform.position,1f);  
-                                }
                             } 
       
         
                         }  
+                      }
                     }
-                }
+                
                 
                 yield return null;          
         }
@@ -300,11 +312,9 @@ namespace RPG.Combat
             if(attack == 0)
             {
                 StopAllCoroutines();
-                attack = 5;
-                isMovingAttacking = true;                
+                attack = 5;          
                 animator.SetTrigger("MoveAttack1Trigger");   
                 StartCoroutine(_LockMovementAndAttack(moveAttackTime));
-                isMovingAttacking = false;
             }       
 	    }
         public void AttackChain()
@@ -337,7 +347,6 @@ namespace RPG.Combat
             canChain = false;
             animator.SetInteger("Attack", 1);
             attack = 1;
-            isAttacking = true;  
             StartCoroutine(_ChainWindow(0.1f, .8f));
             StartCoroutine(_LockMovementAndAttack(0.6f));
             yield return null;
@@ -369,15 +378,11 @@ namespace RPG.Combat
             animator.SetInteger("Attack", 0);
             yield return new WaitForSeconds(chainLength);
             canChain = false;
-        }
-        public bool GetIsAttacking()
-        {
-            return isAttacking;
-        }                        
+        }                    
         public IEnumerator _LockMovementAndAttack(float pauseTime)
         {
             isStunned = true;
-            animator.applyRootMotion = true;
+            //animator.applyRootMotion = true;
             inputVec = new Vector3(0, 0, 0);
             newVelocity = new Vector3(0, 0, 0);
             animator.SetFloat("Input X", 0);
@@ -387,7 +392,7 @@ namespace RPG.Combat
             animator.SetInteger("Attack", 0);
             canChain = false;
             isStunned = false;
-            animator.applyRootMotion = false;
+            //animator.applyRootMotion = false;
             //small pause to let blending finish
             yield return new WaitForSeconds(0.2f);
             isAttacking = false;  
@@ -399,6 +404,12 @@ namespace RPG.Combat
         public bool CanAttack(GameObject combatTarget)
         {
              if(combatTarget == null) {return false;}
+             if(!GetComponent<Mover>().CanMoveTo(combatTarget.transform.position) && !GetisInRangeToAttack(combatTarget.transform))
+             {
+
+                 return false;
+
+             } 
              Health targetToTest = combatTarget.GetComponent<Health>();
              return targetToTest != null && !targetToTest.IsDead();
         }
@@ -408,13 +419,13 @@ namespace RPG.Combat
         }
         public  void AttackBehaviour()
         {
-                transform.LookAt(target.transform);            
-                    if(timeSinceLastAttack > timeBetweenAttacks)
-                    {
-                        //  Trigger the Hit() Event
-                        TriggerAttack();
-                        timeSinceLastAttack = 0;
-                    }                         
+            transform.LookAt(target.transform);            
+            if(timeSinceLastAttack > timeBetweenAttacks)
+            {
+                //  Trigger the Hit() Event
+                TriggerAttack();
+                timeSinceLastAttack = 0;
+            }                         
    
         }
         public IEnumerator _BlockHitReact(){
@@ -429,34 +440,70 @@ namespace RPG.Combat
             GetComponent<Animator>().SetTrigger("attack");
                             
         }
-      
 
         // Animation Event
         void Hit()
-        {         
-            if(target == null) return;
-            float damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
-            if(currentWeapon.value !=null)
+        {
+            BlockAngle();
+            if (target == null) return;
+            if (currentWeapon.value != null)
             {
                 currentWeapon.value.OnHit();
             }
-            if(currentWeaponConfig.HasProjectile())
+            if (currentWeaponConfig.HasProjectile())
             {
-              currentWeaponConfig.LaunchProjectile(rightHandTransform,leftHandTransform,target,gameObject,damage);
+                currentWeaponConfig.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
             }
             else
             {
+                
                 //if(currentWeapon.value.isCollidingWithEnemy())
                 target.TakeDamage(gameObject, damage);
             }
-            
+
         }
         void Shoot()
         {
             Hit();
         }
-        
-	public void FootR(){
+        public void BlockAngle()
+        {           
+          
+            if (playerFighter.isBlocking && IsInPlayerBlockAngle())
+            {
+                
+                damage = GetComponent<BaseStats>().GetStat(Stat.Damage) * 0.35f;
+            }
+            else
+            {
+                damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
+            }  
+            
+        }
+        private bool IsInPlayerBlockAngle()
+        {          
+            float viewAngle = 90f;
+            RaycastHit[] hits =  Physics.SphereCastAll(player.transform.position,15f, Vector3.up);
+            // Loop
+            foreach(RaycastHit hit in hits)
+            {
+                AIController enemy = hit.collider.GetComponent<AIController>();    
+                if(enemy == null) continue;
+                Vector3 enemyPos = enemy.transform.position;
+                if (Vector3.Distance(enemyPos, player.transform.position) <= 15f)
+                {
+                    Vector3 directionToPlayer = (enemyPos - player.transform.position);
+                    float angleBetweenGuardAndPlayer = Vector3.Angle(player.transform.forward, directionToPlayer);
+                    if (angleBetweenGuardAndPlayer <= viewAngle)
+                    {   
+                        return true;            
+                    }
+                }
+            }                    
+            return false;
+        }
+
+        public void FootR(){
 	}
 	
 	public void FootL(){
@@ -467,9 +514,9 @@ namespace RPG.Combat
 	
 	public void WeaponSwitch(){
 	}
-        public bool GetisInRangeToAttack()
+        public bool GetisInRangeToAttack(Transform targetTransform)
         {
-            return Vector3.Distance(transform.position, target.transform.position) < currentWeaponConfig.GetWeaponRange();
+            return Vector3.Distance(transform.position, targetTransform.position) < currentWeaponConfig.GetWeaponRange();
         }
        /* public bool GetIsInAbilityRange()
         {
@@ -507,22 +554,6 @@ namespace RPG.Combat
              string weaponName = currentWeaponConfig.name = (string)state;
              WeaponConfig weapon = UnityEngine.Resources.Load<WeaponConfig>(weaponName);
              EquipWeapon(weapon);
-        }
-
-        public IEnumerable<float> GetAdditiveModifiers(Stat stat)
-        {
-            if(stat == Stat.Damage)
-            {
-                yield return currentWeaponConfig.GetWeaponDamage();
-            }
-        }
-
-        public IEnumerable<float> GetPercentageModifiers(Stat stat)
-        {
-            if(stat == Stat.Damage)
-            {
-                yield return currentWeaponConfig.GetPercentageBonus();
-            }
         }
     }
     

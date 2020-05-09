@@ -33,6 +33,11 @@ MonoBehaviour:
       - 10
       - 15
       - 20
+    - stat: 4
+      levels:
+      - 0
+      - 0
+      - 0
   - characterClass: 1
     stats:
     - stat: 0

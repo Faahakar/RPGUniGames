@@ -3,15 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using RPG.Attributes;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace RPG.Combat
 {
     public class Weapon : MonoBehaviour
     {
         bool isCollidingWith = false;
+        [SerializeField] UnityEvent onHit;
         public void OnHit()
         {
-           // print("Weapon Hit" + gameObject.name);
+           onHit.Invoke();
+          
         }
         private void OnTriggerEnter(Collider other) {
             if(other.GetComponent<Health>() == null) return;

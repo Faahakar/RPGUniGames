@@ -1,5 +1,5 @@
 using UnityEngine;
-using RPG.Saving;
+using GameDevTV.Saving;
 using RPG.Stats;
 using RPG.Core;
 using System;
@@ -10,14 +10,23 @@ namespace RPG.Attributes
 {     
     public class Health : MonoBehaviour,ISaveable
     {
-         [SerializeField] float  regenerationPercentage = 70;
-         
+        [SerializeField] float  regenerationPercentage = 70;
         [SerializeField] TakeDamageEvent takeDamage;
+
+        [SerializeField] HealDamageEvent healDamage;
+        [SerializeField] UnityEvent OnDie, OnTookHit;
         [System.Serializable]
         public class TakeDamageEvent : UnityEvent<float>
         {
 
         }
+
+        public class HealDamageEvent : UnityEvent<float>
+        {
+
+        }
+       
+        
          LazyValue<float> healthPoints;
          bool isDead = false;
          private void Awake()
@@ -32,6 +41,7 @@ namespace RPG.Attributes
          {
            healthPoints.ForceInit();
          } 
+
          private void OnEnable() 
          {
              GetComponent<BaseStats>().onLevelUp += RegenerateHealth;
@@ -47,16 +57,25 @@ namespace RPG.Attributes
          }
          public void TakeDamage(GameObject instigator,float damage)
          {
-              healthPoints.value =  Mathf.Max(healthPoints.value - damage , 0);
-               if(healthPoints.value == 0)
+           SetHealthPoints(Mathf.Max(healthPoints.value - damage , 0));
+              if(healthPoints.value == 0)
               {
                 Die();
+                OnDie.Invoke();               
                 AwardExperience(instigator);
               }
               else
-              {
+              {             
+                
                 takeDamage.Invoke(damage);
               }
+         }
+         public void HealDamage(float value,GameObject user)
+         {
+            Health target = user.GetComponent<Health>();
+            target.SetHealthPoints(Mathf.Min(target.healthPoints.value + value, target.GetMaxHealth()));
+           /* if(healthPoints.value > 0)            
+            healDamage.Invoke(value);*/
          }
 
         private void AwardExperience(GameObject instigator)
@@ -66,6 +85,10 @@ namespace RPG.Attributes
               if(experience == null) return;
               experience.GainExperience(GetComponent<BaseStats>().GetStat(Stat.ExperienceReward));
 
+        }
+        public void SetHealthPoints(float value)
+        {
+           healthPoints.value = value;
         }
          public float GetHealthPoints()
          {
@@ -91,10 +114,11 @@ namespace RPG.Attributes
             GetComponent<ActionScheduler>().CancelCurrentAction();
             transform.Find("Quad").gameObject.SetActive(false);
          }
+
          private void RegenerateHealth()
         {
           float regenHealthPoints = GetComponent<BaseStats>().GetStat(Stat.Health) * (regenerationPercentage/100);
-          healthPoints.value = Mathf.Max(healthPoints.value,regenHealthPoints);
+          SetHealthPoints(Mathf.Max(healthPoints.value,regenHealthPoints));
         }
         public object CaptureState()
         {

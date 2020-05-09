@@ -2,7 +2,7 @@
 using UnityEngine.AI;
 using RPG.Attributes;
 using RPG.Combat;
-using RPG.Saving;
+using GameDevTV.Saving;
 using RPG.Core;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ namespace RPG.Movement
         [SerializeField] Transform target;
         [SerializeField] float maxSpeed = 6f;
         NavMeshAgent navMeshAgent;
+        [SerializeField] float maxNavPathLength = 40f;
 
         float speed = 0;
         bool canMove = true;
@@ -45,6 +46,26 @@ namespace RPG.Movement
             GetComponent<Fighter>().Cancel();
             MoveTo(destination, speedFraction);
         }
+        public bool CanMoveTo(Vector3 destination)
+        {
+          NavMeshPath path = new NavMeshPath();
+
+          bool hasPath = NavMesh.CalculatePath(transform.position,destination,NavMesh.AllAreas,path);
+          if(!hasPath) return false;
+          if (path.status != NavMeshPathStatus.PathComplete) return false;
+          if(GetPathLength(path) > maxNavPathLength) return false;
+          return true;
+        }
+        private float GetPathLength(NavMeshPath path)
+        {
+          float total = 0;
+          if(path.corners.Length < 2) return total;
+          for(int i = 0;  i <  path.corners.Length - 1 ; i++)
+          {
+            total += Vector3.Distance(path.corners[i], path.corners[i+1]);          
+          }
+          return total;
+        }
 
         public void MoveTo(Vector3 destination, float speedFraction)
         {
@@ -67,25 +88,6 @@ namespace RPG.Movement
                 }
 
             }
-
-        }
-
-        public void isMovingRunning(bool isMoving, bool isRunning)
-        {
-           
-           if(isMoving)
-           {
-            animator.SetBool("Moving",true);
-            if(isRunning)
-            {
-                animator.SetBool("Running",true);
-            }
-           }
-           else
-           {
-            animator.SetBool("Moving",false);
-            animator.SetBool("Running",false);
-           }
 
         }
         public void Cancel()
