@@ -518,6 +518,12 @@ PrefabInstance:
       propertyPath: isUsingAttackChain
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114096510035373982, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
+        type: 3}
+      propertyPath: defaultShield
+      value: 
+      objectReference: {fileID: 11400000, guid: a9834aec8502f854a863b1cd12e50778,
+        type: 2}
     - target: {fileID: 114350735469824738, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.size

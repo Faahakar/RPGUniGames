@@ -18,19 +18,24 @@ namespace RPG.Combat
 {
     public class Fighter : MonoBehaviour,IAction, ISaveable
     {
+        
+        public UnityEvent specialAttack,moveAttack;
+
+        public event Action blocked;
         Rigidbody rigidBody;
         [SerializeField] float timeBetweenAttacks = 1f;
         [SerializeField] Transform rightHandTransform = null;
         [SerializeField] Transform leftHandTransform = null;
         [SerializeField] WeaponConfig defaultWeapon = null;
+
+        [SerializeField] WeaponConfig defaultShield = null;
         [SerializeField] bool isPlayer  = false;
-        [SerializeField] float moveAttackTime = 0.9f;
       
         Health target;
         Equipment equipment;
        
         float timeSinceLastAttack = Mathf.Infinity;
-        float damage = 0;
+        float damage = 0, block = 0;
         float rotationSpeed = 15f;
         public float gravity = -9.83f;
         public float runSpeed = 8f;
@@ -38,8 +43,8 @@ namespace RPG.Combat
         public float strafeSpeed = 3f;
 
         
-        WeaponConfig currentWeaponConfig;
-        LazyValue<Weapon> currentWeapon;
+        WeaponConfig currentWeaponConfig, shieldConfig;
+        LazyValue<Weapon> currentWeapon, currentShield;
         int attack = 0;
         bool isAttacking;
         bool canChain, isStunned;
@@ -55,16 +60,16 @@ namespace RPG.Combat
         private Vector3 dashInputVec;
         GameObject player;
         Fighter playerFighter;
-       [SerializeField]  OnTookHit onTookHit;
-        public class OnTookHit: UnityEvent<float>
-        {
+        float journeyLength = 0;
+        private float currentTeleportTime;
+        private bool acceptInput = true;
 
-        }
-
-        private void Awake() 
+        private void Awake()
         {
+            shieldConfig = defaultShield;
             currentWeaponConfig = defaultWeapon;
             currentWeapon = new LazyValue<Weapon>(SetupDefaultWeapon);
+            currentShield = new LazyValue<Weapon>(SetupDefaultShield);
             equipment = GetComponent<Equipment>();
             player =  GameObject.FindWithTag("Player");
             playerFighter = GameObject.FindWithTag("Player").GetComponent<Fighter>();    
@@ -73,6 +78,11 @@ namespace RPG.Combat
                 if(defaultWeapon !=null)
                 {
                     equipment.AddItem(EquipLocation.Weapon,defaultWeapon);
+
+                }
+                if(defaultShield !=null)
+                {
+                    equipment.AddItem(EquipLocation.Shield,defaultShield);
 
                 }
             
@@ -84,6 +94,7 @@ namespace RPG.Combat
         private void UpdateWeapon()
         {
             var weapon = equipment.GetItemInSlot(EquipLocation.Weapon) as WeaponConfig;
+            var shield = equipment.GetItemInSlot(EquipLocation.Shield) as WeaponConfig;
             if(weapon == null)
             {
                 EquipWeapon(defaultWeapon);
@@ -92,12 +103,24 @@ namespace RPG.Combat
             {
                 EquipWeapon(weapon);
             }
+            if(shield == null)
+            {
+                EquipShield(defaultShield);
+            }
+            else
+            {
+                EquipShield(shield);
+            }
 
         }
 
         private Weapon SetupDefaultWeapon()
         {
             return AttachWeapon(defaultWeapon);
+        }
+        private Weapon SetupDefaultShield()
+        {
+            return AttachWeapon(defaultShield);
         }
 
         private void Start() 
@@ -106,38 +129,37 @@ namespace RPG.Combat
             animator = GetComponent<Animator>();
             navmeshAgent = GetComponent<NavMeshAgent>();
             currentWeapon.ForceInit();
+            if(defaultShield !=null)
+            currentShield.ForceInit();
         }
         public void EquipWeapon(WeaponConfig weapon)
         {
             currentWeaponConfig = weapon;
             currentWeapon.value = AttachWeapon(weapon);
         }
+        public void EquipShield(WeaponConfig shield)
+        {
+            shieldConfig = shield;
+            currentShield.value = AttachWeapon(shield);
+        }
 
         private Weapon AttachWeapon(WeaponConfig weapon)
-        {
-            return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
+        {      
+           return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
+  
         private void Update()
         {
-            IsInPlayerBlockAngle();
-            timeSinceLastAttack += Time.deltaTime;
-            StartCoroutine(PlayerEnemyBranching());           
-        }
-
-        private void LateUpdate() {
-            rigidBody.velocity = navmeshAgent.velocity;
-            velocity = rigidBody.velocity;
+            velocity = navmeshAgent.velocity;
             velocityX = transform.InverseTransformDirection(velocity).x;
             velocityZ = transform.InverseTransformDirection(velocity).z;
-            //rgVelocityX = transform.InverseTransformDirection(rigidBody.velocity).x;
-            //rgVelocityZ = transform.InverseTransformDirection(rigidBody.velocity).x;
             
             //Update animator with movement values
             if(isPlayer)
             {
 
-                animator.SetFloat("Input X", velocityX);
-                animator.SetFloat("Input Z", velocityZ);
+                animator.SetFloat("Input X", velocityX / runSpeed);
+                animator.SetFloat("Input Z", velocityZ /runSpeed);
          
             }
             else
@@ -145,29 +167,15 @@ namespace RPG.Combat
              animator.SetFloat("ForwardSpeed", velocityZ);
 
             }
-        }       
-        void FixedUpdate()
-        {
-            rigidBody.AddForce(0, gravity, 0, ForceMode.Acceleration);
-            UpdateMovement();           
-            
+            IsInPlayerBlockAngle();
+            timeSinceLastAttack += Time.deltaTime;
+            StartCoroutine(PlayerEnemyBranching());           
         }
 
-        private void UpdateMovement()
-        {
-           	Vector3 motion = inputVec;
-			if(!isBlocking && !isStunned){
-				//character is not strafing
-					newVelocity = motion.normalized * runSpeed;
-				
-            }
-			
-			//no input, character not moving
-			else{
-				newVelocity = new Vector3(0,0,0);
-				inputVec = new Vector3(0,0,0);
-			}
-        }
+        private void LateUpdate() {
+        }      
+
+    
         IEnumerator PlayerEnemyBranching()
         {
            if(isPlayer)
@@ -197,29 +205,43 @@ namespace RPG.Combat
             yield return null;          
         }
         IEnumerator AbilitiesController()
-        {      
-          
-            if (Input.GetMouseButtonDown(1))
+        {
+            if (acceptInput == true)
             {
-                
-                if (!inBlock && attack == 0)
+
+
+
+                if (Input.GetMouseButton(1))
                 {
-                    
-                    animator.SetBool("Block", true);
-                    isBlocking = true;        
-                    animator.SetBool("Running", false);
-                    animator.SetBool("Moving", false);
+
+                    if (!inBlock && attack == 0)
+                    {
+                        Cancel();
+                        animator.SetBool("Block", true);
+                        isBlocking = true;
+                        animator.SetBool("Running", false);
+                        animator.SetBool("Moving", false);
+                    }
                 }
-            }  
-            if(Input.GetMouseButtonUp(1))
-            {
-                inBlock = false;
-                isBlocking = false;       
-                animator.SetBool("Block", false);
-            }                            
-               if(!isStunned && isTargetInvalid())
-               {
-                    if(velocity.sqrMagnitude > 0f && 0.1f < velocity.sqrMagnitude)
+                if (Input.GetMouseButtonUp(1))
+                {
+                    inBlock = false;
+                    isBlocking = false;
+                    animator.SetBool("Block", false);
+
+                }
+
+                if (Input.GetButtonDown("Fire3"))
+                {
+                    if (player.GetComponent<Stamina>().GetStaminaPoints() == 100f)
+                    {
+                        SpecialAttack();
+                    }
+
+                }
+                if (isTargetInvalid())
+                {
+                    if (velocity.sqrMagnitude > 0f && 0.1f < velocity.sqrMagnitude)
                     {
                         animator.SetBool("Moving", true);
                         animator.SetBool("Running", true);
@@ -228,55 +250,52 @@ namespace RPG.Combat
                     {
                         animator.SetBool("Moving", false);
                         animator.SetBool("Running", false);
-                    }                  
-                } 
-
-                else if(!isTargetInvalid())
-                {
-                    transform.LookAt(target.transform);   
-                                      
-                                   
-                    if(!isBlocking)
-                    {        
-    
-                        if (GetisInRangeToAttack(target.transform))
-                        {     
-                              
-                            //print(attack);                        
-                            if(Input.GetButtonDown("Fire1"))
-                            {  
-                              // print(attack);
-                                AttackChain();                
-                            }
-                            // GetComponent<Mover>().Cancel();  
-                            // yield return new WaitForSeconds(0.15f);
-                            animator.SetBool("Moving", false);
-                            animator.SetBool("Running", false); 
-                        }                    
-                        else if(!GetisInRangeToAttack(target.transform))
-                        {               
-                            if(attack == 0)
-                            {
-                                if(Input.GetButtonDown("Fire2") && Vector3.Distance(transform.position,target.transform.position) <= 9f - navmeshAgent.stoppingDistance)
-                                {
-                                    MoveAttack();  
-                                    animator.SetBool("Moving", false);
-                                    animator.SetBool("Running", false);                                
-                                    yield return new WaitForSeconds(moveAttackTime);                                
-                                    animator.SetBool("Moving", true);
-                                    animator.SetBool("Running", true);  
-
-                                }        
-                                    GetComponent<Mover>().MoveTo(target.transform.position,1f);  
-                            } 
-      
-        
-                        }  
-                      }
                     }
-                
-                
-                yield return null;          
+
+                }
+                else if (!isTargetInvalid())
+                {
+                    transform.LookAt(target.transform);
+
+
+                    if (!isBlocking)
+                    {
+
+                        if (GetisInRangeToAttack(target.transform))
+                        {
+
+                            if (Input.GetButtonDown("Fire1"))
+                            {
+                                AttackChain();
+                            }
+                            animator.SetBool("Moving", false);
+                            animator.SetBool("Running", false);
+                        }
+                        else if (!GetisInRangeToAttack(target.transform))
+                        {
+                            if (!isStunned)
+                            {
+                                if (attack == 0)
+                                {
+                                    if (Input.GetButtonDown("Fire2") && Vector3.Distance(transform.position, target.transform.position) <= 9f - navmeshAgent.stoppingDistance)
+                                    {
+
+                                        MoveAttack();
+
+                                    }
+                                    GetComponent<Mover>().MoveTo(target.transform.position, 1f);
+
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+            }
+
+
+            yield return null;
         }
         public bool ReachedDestination()
         {
@@ -309,16 +328,22 @@ namespace RPG.Combat
         }
         public void MoveAttack()
         {
+
+            moveAttack.Invoke();
             if(attack == 0)
             {
                 StopAllCoroutines();
-                attack = 5;          
-                animator.SetTrigger("MoveAttack1Trigger");   
-                StartCoroutine(_LockMovementAndAttack(moveAttackTime));
+                attack = 5;     
+                animator.ResetTrigger("MoveAttack1Trigger");   
+                animator.SetTrigger("MoveAttack1Trigger");  
+                StartCoroutine(_Blockinput(.4f));
+                StartCoroutine(_LockMovementAndAttack(0.9f));
+                StartCoroutine(_Teleport(1.2f));
             }       
 	    }
         public void AttackChain()
         {                 
+           // print(attack);
             if(attack == 0)
             {        
                 StartCoroutine(_Attack1());
@@ -341,6 +366,37 @@ namespace RPG.Combat
             }
             
 	    }
+        public bool GetAcceptInput()
+        {
+            return acceptInput;
+        }
+        IEnumerator _Blockinput(float inputBlockTime)
+        {
+            acceptInput = false;
+            yield return new WaitForSeconds(inputBlockTime);
+            acceptInput = true;  
+
+        }
+        IEnumerator _Teleport(float timeToTeleport)
+        {
+            
+            float elapsedTime = 0;
+            Vector3 originPosition = player.transform.position;
+            Health teleportTarget = target;
+
+            while(elapsedTime < timeToTeleport)
+            {
+                player.transform.position = Vector3.Lerp(originPosition,teleportTarget.transform.position 
+                - new Vector3(navmeshAgent.stoppingDistance,0,0),timeToTeleport/elapsedTime);
+                elapsedTime+= Time.deltaTime;
+
+                yield return null;
+
+            }
+
+            yield return new WaitForSeconds(0.1f);  
+         
+        }
         IEnumerator _Attack1()
         {
             StopAllCoroutines();
@@ -381,10 +437,9 @@ namespace RPG.Combat
         }                    
         public IEnumerator _LockMovementAndAttack(float pauseTime)
         {
+            GetComponent<Mover>().Cancel();
             isStunned = true;
             //animator.applyRootMotion = true;
-            inputVec = new Vector3(0, 0, 0);
-            newVelocity = new Vector3(0, 0, 0);
             animator.SetFloat("Input X", 0);
             animator.SetFloat("Input Z", 0);
             animator.SetBool("Moving", false);
@@ -397,6 +452,26 @@ namespace RPG.Combat
             yield return new WaitForSeconds(0.2f);
             isAttacking = false;  
             attack = 0;
+        }
+
+        public void SpecialAttack()
+        {
+          specialAttack.Invoke();
+          StopAllCoroutines();
+          attack = 6;
+          animator.ResetTrigger("SpecialAttack1Trigger");
+          animator.SetTrigger("SpecialAttack1Trigger");
+          StartCoroutine(_Blockinput(1.6f));
+          StartCoroutine(_LockMovementAndAttack(1.1f));
+          RaycastHit[] hits =  Physics.SphereCastAll(player.transform.position,10f, Vector3.up);
+           foreach(RaycastHit hit in hits)
+            {
+                AIController enemy = hit.collider.GetComponent<AIController>();    
+                if(enemy == null) continue;
+                enemy.GetComponent<Health>().TakeDamage(player,CalculateDamage()*3);
+            }
+            player.GetComponent<Stamina>().SetStaminaPoints(0);
+
         }
 
 
@@ -429,26 +504,45 @@ namespace RPG.Combat
    
         }
         public IEnumerator _BlockHitReact(){
+            StopAllCoroutines();
             StartCoroutine(_LockMovementAndAttack(0.5f));
-            animator.SetTrigger("BlockHitReactTrigger");
+            target.GetComponent<Animator>().SetTrigger("BlockHitReactTrigger");
             yield return null;
         }
 
         private void TriggerAttack()
         {
-            GetComponent<Animator>().ResetTrigger("stopattack");
-            GetComponent<Animator>().SetTrigger("attack");
+            if(!isPlayer)
+            {
+                GetComponent<Animator>().ResetTrigger("stopattack");
+                GetComponent<Animator>().SetTrigger("attack");
+
+
+            }
+
                             
         }
 
         // Animation Event
         void Hit()
         {
-            BlockAngle();
+            //1
+            float damage = CalculateDamage();
             if (target == null) return;
+            if(isBlockingAndInAngle())
+            {
+                if(target.gameObject.tag == "Player")
+                {
+                    StartCoroutine(_BlockHitReact());
+                }
+            }
+            Stamina stamina =  this.GetComponent<Stamina>();
+            if(stamina != null) 
+            stamina.GainStamina(currentWeaponConfig.GetStaminaGain());
             if (currentWeapon.value != null)
             {
                 currentWeapon.value.OnHit();
+ 
             }
             if (currentWeaponConfig.HasProjectile())
             {
@@ -456,30 +550,35 @@ namespace RPG.Combat
             }
             else
             {
-                
-                //if(currentWeapon.value.isCollidingWithEnemy())
                 target.TakeDamage(gameObject, damage);
             }
 
         }
+
         void Shoot()
         {
             Hit();
+        }   
+
+        public float CalculateDamage()
+        {
+            float totalDamage = 0;
+           if(isBlockingAndInAngle())
+           {
+             totalDamage = Mathf.Max(GetComponent<BaseStats>().GetStat(Stat.Damage) - playerFighter.shieldConfig.GetBlockRating(),0);   
+              //playerFighter.GetComponent<Stamina>().GainStamina(shieldConfig.GetStaminaGain());
+           }
+           else
+           {
+               totalDamage = GetComponent<BaseStats>().GetStat(Stat.Damage);
+           }
+           return totalDamage;
         }
-        public void BlockAngle()
-        {           
-          
-            if (playerFighter.isBlocking && IsInPlayerBlockAngle())
-            {
-                
-                damage = GetComponent<BaseStats>().GetStat(Stat.Damage) * 0.35f;
-            }
-            else
-            {
-                damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
-            }  
-            
+        public bool isBlockingAndInAngle()
+        {
+             return playerFighter.isBlocking && IsInPlayerBlockAngle();
         }
+
         private bool IsInPlayerBlockAngle()
         {          
             float viewAngle = 90f;
@@ -518,11 +617,6 @@ namespace RPG.Combat
         {
             return Vector3.Distance(transform.position, targetTransform.position) < currentWeaponConfig.GetWeaponRange();
         }
-       /* public bool GetIsInAbilityRange()
-        {
-             return Vector3.Distance(transform.position, target.transform.position) < currentWeaponConfig.GetAbilityRange();
-        }*/
-
         public void Attack(GameObject combatTarget)
        {
             GetComponent<ActionScheduler>().StartAction(this);
@@ -538,8 +632,13 @@ namespace RPG.Combat
 
         public void StopAttack()
         {        
-            GetComponent<Animator>().ResetTrigger("attack"); 
-            GetComponent<Animator>().SetTrigger("stopattack");   
+            if(!isPlayer)
+            {
+                GetComponent<Animator>().ResetTrigger("attack"); 
+                GetComponent<Animator>().SetTrigger("stopattack");   
+
+            }
+ 
         }
         public Health GetTarget()
         {

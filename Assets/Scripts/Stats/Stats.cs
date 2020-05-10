@@ -6,6 +6,8 @@ namespace RPG.Stats
           ExperienceReward,
           ExperienceToLevelUp,
           Damage,
-          Heal
+          Heal,
+          Stamina,
+          Block
      }
 }

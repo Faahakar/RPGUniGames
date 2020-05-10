@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2e2c4257e7ee2949a243919d5326b0e, type: 3}
+  m_Name: NoShield
+  m_EditorClassIdentifier: 
+  itemID: 752eb39d-afa0-4bcb-98cd-cb9f5df5d1bd
+  displayName: Empty
+  description: 
+  icon: {fileID: 0}
+  pickup: {fileID: 0}
+  stackable: 0
+  allowedEquipLocation: 5
+  animatorOverride: {fileID: 0}
+  equippedPrefab: {fileID: 0}
+  weaponRange: 2
+  weapondamage: 0
+  percentageBonus: 0
+  isRightHanded: 0
+  projectile: {fileID: 0}
+  staminaGain: 0
+  blockRating: 0
+  weaponName: None

@@ -18,7 +18,6 @@ namespace GameDevTV.Inventories
         // CONFIG DATA
         [Tooltip("Does an instance of this item get consumed every time it's used.")]
         [SerializeField] bool consumable = false;
-
         public ItemEffect itemEffect = null;
 
        

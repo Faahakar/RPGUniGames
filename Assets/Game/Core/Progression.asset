@@ -38,11 +38,24 @@ MonoBehaviour:
       - 0
       - 0
       - 0
+    - stat: 5
+      levels:
+      - 100
+      - 200
+      - 300
+    - stat: 6
+      levels:
+      - 0
+      - 10
+      - 20
   - characterClass: 1
     stats:
     - stat: 0
       levels:
       - 50
+    - stat: 6
+      levels:
+      - 0
   - characterClass: 2
     stats:
     - stat: 0
@@ -51,14 +64,20 @@ MonoBehaviour:
     - stat: 1
       levels:
       - 10
+    - stat: 6
+      levels:
+      - 0
   - characterClass: 3
     stats:
     - stat: 0
       levels:
-      - 20
+      - 200
     - stat: 1
       levels:
       - 15
+    - stat: 6
+      levels:
+      - 10
   - characterClass: 4
     stats:
     - stat: 0
@@ -67,13 +86,20 @@ MonoBehaviour:
     - stat: 1
       levels:
       - 20
+    - stat: 6
+      levels:
+      - 5
   - characterClass: 5
     stats:
     - stat: 0
       levels:
-      - 0
-    - stat: 0
-      levels: []
+      - 50
+    - stat: 1
+      levels:
+      - 20
+    - stat: 3
+      levels:
+      - 12
   - characterClass: 6
     stats:
     - stat: 0
@@ -81,72 +107,10 @@ MonoBehaviour:
       - 30
     - stat: 1
       levels:
-      - 50
+      - 20
     - stat: 3
       levels:
-      - 8
-  - characterClass: 7
-    stats:
-    - stat: 0
+      - 5
+    - stat: 6
       levels:
-      - 100
-    - stat: 1
-      levels:
-      - 85
-    - stat: 3
-      levels:
-      - 12
-  - characterClass: 8
-    stats:
-    - stat: 0
-      levels:
-      - 200
-    - stat: 1
-      levels:
-      - 250
-    - stat: 3
-      levels:
-      - 30
-  - characterClass: 9
-    stats:
-    - stat: 0
-      levels:
-      - 120
-      - 170
-      - 230
-    - stat: 1
-      levels:
-      - 150
-    - stat: 3
-      levels:
-      - 18
-      - 24
-      - 30
-  - characterClass: 10
-    stats:
-    - stat: 0
-      levels:
-      - 42
-    - stat: 3
-      levels:
-      - 12
-      - 14
-      - 17
-    - stat: 1
-      levels:
-      - 64
-      - 96
-      - 128
-  - characterClass: 11
-    stats:
-    - stat: 0
-      levels:
-      - 120
-    - stat: 1
-      levels:
-      - 96
-    - stat: 3
-      levels:
-      - 12
-      - 14
-      - 17
+      - 2

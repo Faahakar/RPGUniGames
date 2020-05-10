@@ -3,11 +3,11 @@ namespace RPG.Stats
     public  enum CharacterClass
     {
         Player,
-        Grunt,
+       /* Grunt,
         Mage,
         Archer,
         Knight,
-        Warrior_twohanded,
+        Warrior_twohanded,*/
         Goblin_Archer,
         Goblin_warrior,
         Goblin_WarChief,

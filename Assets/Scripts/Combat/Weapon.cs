@@ -11,16 +11,15 @@ namespace RPG.Combat
     {
         bool isCollidingWith = false;
         [SerializeField] UnityEvent onHit;
+   
         public void OnHit()
         {
-           onHit.Invoke();
-          
+           onHit.Invoke();       
         }
         private void OnTriggerEnter(Collider other) {
             if(other.GetComponent<Health>() == null) return;
             if(other.GetComponent<Health>().IsDead()) return;  
            // target.TakeDamage(instigator,damage);
-
            isCollidingWith = true;
 
         }

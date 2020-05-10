@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2e2c4257e7ee2949a243919d5326b0e, type: 3}
+  m_Name: Shield
+  m_EditorClassIdentifier: 
+  itemID: 2e480b71-ce4c-4b7d-920d-fe2725ecb5ce
+  displayName: Shield
+  description: Shields you from harm! Hah!
+  icon: {fileID: 21300000, guid: 886ffb608498aa04c9c0913d5ac3c394, type: 3}
+  pickup: {fileID: 3003379307343018893, guid: 5124a1895f8c5314e8f6c11e5f152386, type: 3}
+  stackable: 0
+  allowedEquipLocation: 6
+  animatorOverride: {fileID: 22100000, guid: 1781c891eba2f0647918d604e93df462, type: 2}
+  equippedPrefab: {fileID: -7187939732775751899, guid: 422068ed454e0f549bb9ab872830877f,
+    type: 3}
+  weaponRange: 0
+  weapondamage: 0
+  percentageBonus: 0
+  isRightHanded: 0
+  projectile: {fileID: 0}
+  staminaGain: 10
+  blockRating: 10
+  weaponName: Shield

@@ -35,6 +35,7 @@ namespace RPG.Control
           //Shader.SetGlobalVector ("_GLOBALMaskPosition",transform.position);
           //Shader.SetGlobalFloat ("_GLOBALMaskRadius", radius);
           //Shader.SetGlobalFloat ("_GLOBALMaskSoftness", softness);  
+            if(GetComponent<Fighter>().GetAcceptInput() == false) return;
             if(InteractWithUI()) return;
             if(health.IsDead()) 
             {

@@ -16,9 +16,16 @@ namespace RPG.Combat
         [SerializeField] float percentageBonus = 0;
         [SerializeField] bool isRightHanded = true;
         [SerializeField] Projectile projectile = null;
+        [SerializeField] float staminaGain = 0f;
+        [SerializeField] float blockRating = 0f;
         bool isCollidingWith = false;
 
-        const string weaponName = "Weapon";
+        [SerializeField] string weaponName = "Weapon";
+
+        public float GetStaminaGain()
+        {
+            return staminaGain;
+        }
 
         public Weapon Spawn(Transform rightHandTransform,Transform leftHandTransform, Animator animator)
         {
@@ -92,13 +99,20 @@ namespace RPG.Combat
         {
             return weapondamage;
         }
-
+        public float GetBlockRating()
+        {
+            return blockRating;
+        }
         public IEnumerable<float> GetAdditiveModifiers(Stat stat)
         {
             if(stat == Stat.Damage)
             {
                 yield return weapondamage;
             }
+           /* if(stat == Stat.Block)
+            {
+                yield return blockRating;
+            }*/
         }
 
         public IEnumerable<float> GetPercentageModifiers(Stat stat)

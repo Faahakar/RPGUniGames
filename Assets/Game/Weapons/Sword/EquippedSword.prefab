@@ -220,6 +220,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  staminaGain: 10
 --- !u!65 &5522969620151241435
 BoxCollider:
   m_ObjectHideFlags: 0
