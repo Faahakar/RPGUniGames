@@ -150,6 +150,12 @@ namespace RPG.Combat
   
         private void Update()
         {
+            IsInPlayerBlockAngle();
+            timeSinceLastAttack += Time.deltaTime;
+            StartCoroutine(PlayerEnemyBranching());           
+        }
+
+        private void LateUpdate() {
             velocity = navmeshAgent.velocity;
             velocityX = transform.InverseTransformDirection(velocity).x;
             velocityZ = transform.InverseTransformDirection(velocity).z;
@@ -167,12 +173,6 @@ namespace RPG.Combat
              animator.SetFloat("ForwardSpeed", velocityZ);
 
             }
-            IsInPlayerBlockAngle();
-            timeSinceLastAttack += Time.deltaTime;
-            StartCoroutine(PlayerEnemyBranching());           
-        }
-
-        private void LateUpdate() {
         }      
 
     
@@ -208,9 +208,6 @@ namespace RPG.Combat
         {
             if (acceptInput == true)
             {
-
-
-
                 if (Input.GetMouseButton(1))
                 {
 
@@ -283,7 +280,10 @@ namespace RPG.Combat
                                         MoveAttack();
 
                                     }
+
                                     GetComponent<Mover>().MoveTo(target.transform.position, 1f);
+                                    animator.SetBool("Moving", true);
+                                    animator.SetBool("Running", true);
 
                                 }
                             }
@@ -330,16 +330,13 @@ namespace RPG.Combat
         {
 
             moveAttack.Invoke();
-            if(attack == 0)
-            {
                 StopAllCoroutines();
-                attack = 5;     
-                animator.ResetTrigger("MoveAttack1Trigger");   
+                attack = 5;    
                 animator.SetTrigger("MoveAttack1Trigger");  
+               // StartCoroutine(_ResetTrigger(1.2f));  
                 StartCoroutine(_Blockinput(.4f));
                 StartCoroutine(_LockMovementAndAttack(0.9f));
-                StartCoroutine(_Teleport(1.2f));
-            }       
+                StartCoroutine(_Teleport(1.2f));     
 	    }
         public void AttackChain()
         {                 
@@ -372,9 +369,17 @@ namespace RPG.Combat
         }
         IEnumerator _Blockinput(float inputBlockTime)
         {
+            GetComponent<Mover>().Cancel();
             acceptInput = false;
             yield return new WaitForSeconds(inputBlockTime);
             acceptInput = true;  
+
+        }
+        IEnumerator _ResetTrigger(float resetTriggerTime)
+        {
+            yield return new WaitForSeconds(resetTriggerTime);
+            animator.ResetTrigger("MoveAttack1Trigger");  
+            animator.ResetTrigger("SpecialAttack1Trigger");
 
         }
         IEnumerator _Teleport(float timeToTeleport)
@@ -384,10 +389,10 @@ namespace RPG.Combat
             Vector3 originPosition = player.transform.position;
             Health teleportTarget = target;
 
-            while(elapsedTime < timeToTeleport)
+            while(elapsedTime < timeToTeleport*2)
             {
                 player.transform.position = Vector3.Lerp(originPosition,teleportTarget.transform.position 
-                - new Vector3(navmeshAgent.stoppingDistance,0,0),timeToTeleport/elapsedTime);
+                - new Vector3(navmeshAgent.stoppingDistance,0,0),timeToTeleport*2/elapsedTime);
                 elapsedTime+= Time.deltaTime;
 
                 yield return null;
@@ -443,6 +448,7 @@ namespace RPG.Combat
             animator.SetFloat("Input X", 0);
             animator.SetFloat("Input Z", 0);
             animator.SetBool("Moving", false);
+            animator.SetBool("Running", false);
             yield return new WaitForSeconds(pauseTime);
             animator.SetInteger("Attack", 0);
             canChain = false;
@@ -456,14 +462,15 @@ namespace RPG.Combat
 
         public void SpecialAttack()
         {
-          specialAttack.Invoke();
           StopAllCoroutines();
-          attack = 6;
-          animator.ResetTrigger("SpecialAttack1Trigger");
+          specialAttack.Invoke();
           animator.SetTrigger("SpecialAttack1Trigger");
-          StartCoroutine(_Blockinput(1.6f));
+          attack = 6;
+          GetComponent<Mover>().Cancel();
+         // StartCoroutine(_ResetTrigger(1.3f));  
+          StartCoroutine(_Blockinput(1.3f));
           StartCoroutine(_LockMovementAndAttack(1.1f));
-          RaycastHit[] hits =  Physics.SphereCastAll(player.transform.position,10f, Vector3.up);
+          RaycastHit[] hits =  Physics.SphereCastAll(player.transform.position,7.5f, Vector3.up);
            foreach(RaycastHit hit in hits)
             {
                 AIController enemy = hit.collider.GetComponent<AIController>();    

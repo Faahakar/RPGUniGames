@@ -30,4 +30,4 @@ MonoBehaviour:
     type: 3}
   staminaGain: 10
   blockRating: 0
-  activeBlockRating: 10
+  weaponName: Weapon

@@ -24,9 +24,12 @@ namespace RPG.Control
         [SerializeField] float maxNavMeshProjectionDistance = 1.0f;
         [SerializeField] float raycastRadius = 1f;
         bool isDraggingUI = false;
+        Animator animator;
+
         private void Awake()
         {
           health = GetComponent<Health>();
+          animator = GetComponent<Animator>();
 
         }         
         // Update is called once per frame
@@ -105,6 +108,7 @@ namespace RPG.Control
 
         private bool InteractWithMovement()
         {
+
             Vector3 target;
             bool hasHit = RaycastNavMesh(out target);
             if (hasHit)
@@ -113,7 +117,7 @@ namespace RPG.Control
                 if (Input.GetMouseButtonDown(0))
                 {
                   GetComponent<Mover>().StartMoveAction(target,1f);
-                }          
+                }        
                 SetCursor(CursorType.Movement);
                 return true;
             }
@@ -132,8 +136,6 @@ namespace RPG.Control
           // Find nearest navmesh point
           bool hasCastToNavMesh = NavMesh.SamplePosition(hit.point, out navMeshhit, maxNavMeshProjectionDistance, NavMesh.AllAreas);
           if(!hasCastToNavMesh) return false;
-    
-
           target = navMeshhit.position;
           GetComponent<Mover>().CanMoveTo(target);
          /* NavMeshPath path = new NavMeshPath();

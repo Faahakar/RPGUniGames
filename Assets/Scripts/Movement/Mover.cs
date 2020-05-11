@@ -37,7 +37,16 @@ namespace RPG.Movement
         }
         private void LateUpdate() {
             UpdateAnimator();
-            
+            /*if(ReachedDestination())
+            {
+            animator.SetBool("Moving", false);
+            animator.SetBool("Running", false);
+            }
+            else
+            {
+                animator.SetBool("Moving", true);
+                animator.SetBool("Running", true);
+            }*/
         }
         public void StartMoveAction(Vector3 destination, float speedFraction)
         {
@@ -55,6 +64,21 @@ namespace RPG.Movement
           if (path.status != NavMeshPathStatus.PathComplete) return false;
           if(GetPathLength(path) > maxNavPathLength) return false;
           return true;
+        }
+
+        public bool ReachedDestination()
+        {
+            if (!navMeshAgent.pathPending)
+            {
+                if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+                {
+                    if (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude == 0f)
+                    {
+                    return true;
+                    }
+                }
+            }
+            return false;
         }
         private float GetPathLength(NavMeshPath path)
         {

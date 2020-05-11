@@ -541,13 +541,13 @@ PrefabInstance:
     - target: {fileID: 95850482172132364, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: m_UpdateMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 95850482172132364, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: f4218db5fcda1d24ba5b0d044b3aad0c, type: 2}
+      objectReference: {fileID: 9100000, guid: 3bf7eea3461c7cb40b3914aab04fddb7, type: 2}
     - target: {fileID: 114096510035373982, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: OnTookHit.m_PersistentCalls.m_Calls.Array.size
@@ -757,7 +757,7 @@ PrefabInstance:
     - target: {fileID: 114350735469824738, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
       propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114350735469824738, guid: 17c642f2f1dbcbc4f8099e13bda9dd56,
         type: 3}
